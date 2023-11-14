@@ -193,7 +193,7 @@ endif
 >W
 nm(1 15 1 offDelay "Off delay (minutes) -------" 60 1)
 nm(10 35 1 shortTime "Short coffee (seconds) ---" 60 1)
-bu(save "Save last coffe duration %lastCoffeeTime% (s)" "Save last coffe duration %lastCoffeeTime% (s)")
+bu(save "Save last coffe duration (%lastCoffeeTime% s)" "Save last coffe duration (%lastCoffeeTime% s)")
 bu(rst1 "%spn1% (%spv1% s)" "%spn1% (%spv1% s)")
 bu(rst2 "%spn2% (%spv2% s)" "%spn2% (%spv2% s)")
 bu(rst3 "%spn3% (%spv3% s)" "%spn3% (%spv3% s)")
