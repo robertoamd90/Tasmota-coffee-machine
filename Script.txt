@@ -1,0 +1,203 @@
+>D
+p:offDelay=5
+p:shortTime=25
+
+pulseTimeOffDelay=100
+pulseTimeShortTime=100
+
+power1Status=0
+power2Status=0
+
+save=0
+lastCoffeeTime=0
+
+psnt=""
+save1=0
+save2=0
+save3=0
+save4=0
+rst1=0
+rst2=0
+rst3=0
+rst4=0
+p:spn1=""
+p:spv1=15
+p:spn2=""
+p:spv2=15
+p:spn3=""
+p:spv3=15
+p:spn4=""
+p:spv4=15
+
+holdBtnPwCnt=0
+autoCoffee=0
+
+>E
+if chg[save]>0
+and lastCoffeeTime>0
+then
+shortTime = lastCoffeeTime
+endif
+
+if chg[save1]>0
+and shortTime>0
+then
+spn1=psnt
+spv1=shortTime
+endif
+
+if chg[save2]>0
+and shortTime>0
+then
+spn2=psnt
+spv2=shortTime
+endif
+
+if chg[save3]>0
+and shortTime>0
+then
+spn3=psnt
+spv3=shortTime
+endif
+
+if chg[save4]>0
+and shortTime>0
+then
+spn4=psnt
+spv4=shortTime
+endif
+
+if chg[rst1]>0
+and spv1>0
+then
+shortTime=spv1
+endif
+
+if chg[rst2]>0
+and spv2>0
+then
+shortTime=spv2
+endif
+
+if chg[rst3]>0
+and spv3>0
+then
+shortTime=spv3
+endif
+
+if chg[rst4]>0
+and spv4>0
+then
+shortTime=spv4
+endif
+
+if chg[offDelay]>0
+then
+pulseTimeOffDelay = 100+(offDelay*60)
+print pulseTimeOffDelay changed to %pulseTimeOffDelay%
+->pulsetime1 %pulseTimeOffDelay%
+endif
+
+if chg[shortTime]>0
+or chg[save]
+then
+pulseTimeShortTime = 100+shortTime
+print pulseTimeShortTime changed to %pulseTimeShortTime%
+->pulsetime2 %pulseTimeShortTime%
+endif
+
+>F
+power1Status=pin[27]
+power2Status=pin[14]
+
+if chg[power1Status]>0
+then
+if power1Status==0
+then
+=>Power2 Off
+->SwitchMode2 15
+autoCoffee=0
+endif
+if power1Status==1
+then
+->SwitchMode2 3
+endif
+endif
+
+if chg[power2Status]>0
+then
+if power2Status==1
+and power1Status==0
+then
+=>Power2 Off
+endif
+if power2Status==1
+and power1Status==1
+then
+print reset pulsetime1
+pulseTimeOffDelay = 100+(offDelay*60)
+->pulsetime1 %pulseTimeOffDelay%
+autoCoffee=0
+lastCoffeeTime=0
+endif
+endif
+
+if power1Status==1
+and power2Status==0
+and pin[32]==0
+and autoCoffee==0
+then
+holdBtnPwCnt+=1
+if holdBtnPwCnt>=25
+then
+print Auto Coffee set
+holdBtnPwCnt=0
+autoCoffee=2
+=>Power1 Off
+then
+endif
+else
+holdBtnPwCnt=0
+endif
+
+if power1Status==1
+and power2Status==1
+then
+lastCoffeeTime+=(1/10)
+endif
+
+if autoCoffee>1
+then
+autoCoffee-=1
+if autoCoffee==1
+then
+=>Power1 On
+endif
+endif
+
+>S
+if power2Status==1
+or power1Status==1
+then
+=>TelePeriod
+endif
+
+if autoCoffee==1
+and power1Status==1
+and enrg[7]==0
+then
+print Auto Coffee start
+=>Power2 On
+endif
+
+>W
+nm(1 15 1 offDelay "Off delay (minutes) -------" 60 1)
+nm(10 35 1 shortTime "Short coffee (seconds) ---" 60 1)
+bu(save "Save last coffe duration %lastCoffeeTime% (s)" "Save last coffe duration %lastCoffeeTime% (s)")
+bu(rst1 "%spn1% (%spv1% s)" "%spn1% (%spv1% s)")
+bu(rst2 "%spn2% (%spv2% s)" "%spn2% (%spv2% s)")
+bu(rst3 "%spn3% (%spv3% s)" "%spn3% (%spv3% s)")
+bu(rst4 "%spn4% (%spv4% s)" "%spn4% (%spv4% s)")
+
+tx(psnt "Preset Name:")
+bu(save1 "Save 1" "Save 1")bu(save2 "Save 2" "Save 2")bu(save3 "Save 3" "Save 3")bu(save4 "Save 4" "Save 4")
